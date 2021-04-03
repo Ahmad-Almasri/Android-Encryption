@@ -36,11 +36,11 @@ public class DeleteFile extends AppCompatActivity {
             public void onClick(View v) {
                 // check if the key is correct ...
                 String FN = fileName.getText().toString();
-                if(checkKey(FN+"-KEY-SHA256.txt", key.getText().toString())){
-                    FN+=".txt";
+                if(checkKey(FN+"-KEY-SHA256", key.getText().toString())){
                     File dir = getFilesDir();
                     File file = new File(dir, FN);
-                    boolean deleted = file.delete();
+                    File file2 = new File(dir, FN+"-KEY-SHA256");
+                    boolean deleted = file.delete() && file2.delete();
 
                     if(deleted){
                         content.setText("Deleted");
@@ -63,7 +63,7 @@ public class DeleteFile extends AppCompatActivity {
                 String stringFormat = "";
                 for (String list : lister.list())
                 {
-                    if(!list.contains("-KEY-SHA256.txt") && !list.equals(".txt"))
+                    if(!list.contains("-KEY-SHA256") && !list.equals(".txt"))
                         stringFormat+=list+"\n";
                 }
 

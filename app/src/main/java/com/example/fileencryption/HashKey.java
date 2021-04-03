@@ -3,6 +3,7 @@ package com.example.fileencryption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+
 // SHA-256 HashFunction of a giving key
 
 public class HashKey {
@@ -25,4 +26,6 @@ public class HashKey {
         }
         return hexString.toString();
     }
+
+
 }

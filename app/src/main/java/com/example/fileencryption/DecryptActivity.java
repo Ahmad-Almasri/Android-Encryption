@@ -53,7 +53,7 @@ public class DecryptActivity extends AppCompatActivity {
                 String stringFormat = "";
                 for (String list : lister.list())
                 {
-                    if(!list.contains("-KEY-SHA256.txt") && !list.equals(".txt"))
+                    if(!list.contains("-KEY-SHA256") && !list.equals(".txt"))
                         stringFormat+=list+"\n";
                 }
 
@@ -66,7 +66,7 @@ public class DecryptActivity extends AppCompatActivity {
     // this function for reading the data
     private void readFile(String FILE_NAME, String KEY) {
 
-        if (!checkKey(FILE_NAME+"-KEY-SHA256"+".txt", KEY)) {
+        if (!checkKey(FILE_NAME+"-KEY-SHA256", KEY)) {
             // the key does not match
             content.setText("The key does not match!\n");
             return;
@@ -77,7 +77,7 @@ public class DecryptActivity extends AppCompatActivity {
 
         try {
             // open the file
-            fileInputStream = openFileInput(FILE_NAME+ ".txt");
+            fileInputStream = openFileInput(FILE_NAME);
             // start reading the file
             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -94,7 +94,9 @@ public class DecryptActivity extends AppCompatActivity {
             //System.out.println(encryptedText.toCharArray());
 
             // set Content of the file as a readable text
-            content.setText(new Encrypt().encryptData(encryptedText.toCharArray(), KEY.toCharArray()));
+            Encrypt enc = new Encrypt();
+            String data = enc.encryptData(enc.base64Decode(encryptedText), KEY.getBytes());
+            content.setText(data);
 
         } catch (FileNotFoundException e) {
             // in case if the file does not exist

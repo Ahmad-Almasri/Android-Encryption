@@ -67,7 +67,7 @@ public class EncryptActivity extends AppCompatActivity {
                 String stringFormat = "";
                 for (String list : lister.list())
                 {
-                    if(!list.contains("-KEY-SHA256.txt") && !list.equals(".txt"))
+                    if(!list.contains("-KEY-SHA256") && !list.equals(".txt"))
                         stringFormat+=list+"\n";
                 }
 
@@ -81,12 +81,12 @@ public class EncryptActivity extends AppCompatActivity {
     public void fileContentInit(String FILE_NAME, String content, String KEY) throws UnsupportedEncodingException {
         FileOutputStream fileOutputStream = null;
         // call encryptData function
-        String EncryptedData = new Encrypt().encryptData(content.toUpperCase().toCharArray(), KEY.toCharArray());
+        byte[] EncryptedData = new Encrypt().encryptData(content.getBytes(), KEY.getBytes()).getBytes();
         try {
             // Open a file on a private mode
-            fileOutputStream = openFileOutput(FILE_NAME+".txt", MODE_PRIVATE);
+            fileOutputStream = openFileOutput(FILE_NAME, MODE_PRIVATE);
             //write the content in Bytes
-            fileOutputStream.write(EncryptedData.getBytes());
+            fileOutputStream.write(new Encrypt().base64Encode(EncryptedData).getBytes());
             // clear the input fields
             fileName.getText().clear();
             text.getText().clear();
@@ -114,7 +114,7 @@ public class EncryptActivity extends AppCompatActivity {
     public void fileKeyInit(String FILE_NAME, String KEY) throws NoSuchAlgorithmException {
         // make a separate file to store the hashed key
         // store the hash in a file call FILE_NAME+'-KEY-SHA256'
-        FILE_NAME = FILE_NAME + "-KEY-SHA256" + ".txt";
+        FILE_NAME = FILE_NAME + "-KEY-SHA256";
         FileOutputStream fileOutputStream = null;
         // call hash_Kay_SHA256
         String hashedKey = new HashKey().hash_Kay_SHA256(KEY.getBytes());
