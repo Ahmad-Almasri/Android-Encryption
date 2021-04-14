@@ -17,12 +17,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class DecryptActivity extends AppCompatActivity {
 
     private EditText fileName, key;
     private Button decrypt, listFile;
     private TextView content;
+    private String theUsedKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +55,7 @@ public class DecryptActivity extends AppCompatActivity {
                 String stringFormat = "";
                 for (String list : lister.list())
                 {
-                    if(!list.contains("-KEY-SHA256") && !list.equals(".txt"))
+                    if(!list.contains("-KEY-SHA512") && !list.equals(".txt"))
                         stringFormat+=list+"\n";
                 }
 
@@ -66,7 +68,7 @@ public class DecryptActivity extends AppCompatActivity {
     // this function for reading the data
     private void readFile(String FILE_NAME, String KEY) {
 
-        if (!checkKey(FILE_NAME+"-KEY-SHA256", KEY)) {
+        if (!checkKey(FILE_NAME+"-KEY-SHA512", KEY)) {
             // the key does not match
             content.setText("The key does not match!\n");
             return;
@@ -95,7 +97,7 @@ public class DecryptActivity extends AppCompatActivity {
 
             // set Content of the file as a readable text
             Encrypt enc = new Encrypt();
-            String data = enc.encryptData(enc.base64Decode(encryptedText), KEY.getBytes());
+            String data = enc.encryptData(enc.base64Decode(encryptedText), theUsedKey.getBytes());
             content.setText(data);
 
         } catch (FileNotFoundException e) {
@@ -133,13 +135,20 @@ public class DecryptActivity extends AppCompatActivity {
             hashedKey = stringBuilder.toString();
             hashedKey = stringBuilder.deleteCharAt(hashedKey.length() - 1).toString();
 
+
+            String[] splitter = hashedKey.split("%");
+            String test = splitter[0]+"%"+splitter[1];
+            System.out.println(test);
             // After reading the STORED KEY ... then we need to
             // hash the entered key and check if they are equal.
 
             // call hash_Kay_SHA256
-            String hashedKeyInput = new HashKey().hash_Kay_SHA256(KEY.getBytes());
+            HashKey hashKey = new HashKey();
+            String testInput = hashKey.getAESKeyFromPassword(KEY.toCharArray(), splitter[0].getBytes());
+            String hashedKeyInput = hashKey.hash_Kay_SHA256(testInput.getBytes());
 
-            if(hashedKey.equals(hashedKeyInput)){
+            if(splitter[1].equals(hashedKeyInput)){
+                theUsedKey = testInput;
                 return true;
             }else{
                 return false;
@@ -151,6 +160,8 @@ public class DecryptActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         } finally {
             if (fileInputStream != null) {

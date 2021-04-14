@@ -15,11 +15,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class DeleteFile extends AppCompatActivity {
     private EditText fileName, key;
     private Button btnDelete, listFile;
     private TextView content;
+    private String theUsedKey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,13 +92,20 @@ public class DeleteFile extends AppCompatActivity {
             hashedKey = stringBuilder.toString();
             hashedKey = stringBuilder.deleteCharAt(hashedKey.length() - 1).toString();
 
+
+            String[] splitter = hashedKey.split("%");
+            String test = splitter[0]+"%"+splitter[1];
+            System.out.println(test);
             // After reading the STORED KEY ... then we need to
             // hash the entered key and check if they are equal.
 
             // call hash_Kay_SHA256
-            String hashedKeyInput = new HashKey().hash_Kay_SHA256(KEY.getBytes());
+            HashKey hashKey = new HashKey();
+            String testInput = hashKey.getAESKeyFromPassword(KEY.toCharArray(), splitter[0].getBytes());
+            String hashedKeyInput = hashKey.hash_Kay_SHA256(testInput.getBytes());
 
-            if(hashedKey.equals(hashedKeyInput)){
+            if(splitter[1].equals(hashedKeyInput)){
+                theUsedKey = testInput;
                 return true;
             }else{
                 return false;
@@ -109,6 +118,8 @@ public class DeleteFile extends AppCompatActivity {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
         } finally {
             if (fileInputStream != null) {
                 try {
@@ -120,4 +131,5 @@ public class DeleteFile extends AppCompatActivity {
         }
         return true;
     }
+
 }

@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, Binary.class));
+
             }
         });
 

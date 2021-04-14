@@ -17,12 +17,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class EncryptActivity extends AppCompatActivity {
 
     private EditText fileName, text, key;
     private Button encrypt, listFile;
     private TextView content;
+    private String theUsedKey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +36,7 @@ public class EncryptActivity extends AppCompatActivity {
         encrypt = findViewById(R.id.btnEncrypt);
         listFile = findViewById(R.id.btnList2);
         content = findViewById(R.id.tvContentDec);
+
         /*
         * The text is going to be encrypted using bit wise XOR arithmetic
         * Then the encrypted text is going to be stored on the device, and fileName (is provided by the user)
@@ -50,9 +53,9 @@ public class EncryptActivity extends AppCompatActivity {
                 String userKey = key.getText().toString();
 
                 try {
-                    fileContentInit(userFileName, userText, userKey);
                     fileKeyInit(userFileName, userKey);
-                } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                    fileContentInit(userFileName, userText, theUsedKey);
+                } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeySpecException e) {
                     e.printStackTrace();
                 }
             }
@@ -67,7 +70,7 @@ public class EncryptActivity extends AppCompatActivity {
                 String stringFormat = "";
                 for (String list : lister.list())
                 {
-                    if(!list.contains("-KEY-SHA256") && !list.equals(".txt"))
+                    if(!list.contains("-KEY-SHA512") && !list.equals(".txt"))
                         stringFormat+=list+"\n";
                 }
 
@@ -111,18 +114,26 @@ public class EncryptActivity extends AppCompatActivity {
         }
     }
     // Initialize a file to store the hashed key
-    public void fileKeyInit(String FILE_NAME, String KEY) throws NoSuchAlgorithmException {
+    public void fileKeyInit(String FILE_NAME, String KEY) throws NoSuchAlgorithmException, InvalidKeySpecException {
         // make a separate file to store the hashed key
         // store the hash in a file call FILE_NAME+'-KEY-SHA256'
-        FILE_NAME = FILE_NAME + "-KEY-SHA256";
+        FILE_NAME = FILE_NAME + "-KEY-SHA512";
         FileOutputStream fileOutputStream = null;
-        // call hash_Kay_SHA256
-        String hashedKey = new HashKey().hash_Kay_SHA256(KEY.getBytes());
+        // call hash_Kay_SHA512
+        HashKey hashKey = new HashKey();
+
+        String salt = hashKey.bytesToHex(hashKey.getRandomNonce());
+        String PKDF2 = hashKey.getAESKeyFromPassword(KEY.toCharArray(),salt.getBytes());
+        theUsedKey = PKDF2;
+        String hashedKey = hashKey.hash_Kay_SHA256(PKDF2.getBytes());
+
         try {
             // create a file
             fileOutputStream = openFileOutput(FILE_NAME, MODE_PRIVATE);
             // write the content into the file
-            fileOutputStream.write(hashedKey.getBytes());
+            String test = salt+"%"+hashedKey;
+            System.out.println(test);
+            fileOutputStream.write(test.getBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
